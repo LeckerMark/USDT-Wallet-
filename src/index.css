@@ -1,0 +1,18 @@
+/* Global Styles for USDT Wallet Application with Dark Theme */
+
+body {
+    background-color: #0f172a;
+    color: white;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: white;
+}
+
+p {
+    color: white;
+}
+
+/* Add any additional global styles here */
