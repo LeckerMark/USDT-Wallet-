@@ -1,36 +1,79 @@
-{
-  "name": "usdt-wallet",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1",
-    "typescript": "^4.9.5",
-    "lucide-react": "^0.263.1",
-    "@walletconnect/web3wallet": "^1.8.0",
-    "@safe-global/safe-apps-sdk": "^8.1.0"
-  },
-  "devDependencies": {
-    "@types/react": "^18.0.0",
-    "@types/react-dom": "^18.0.0",
-    "@types/node": "^18.11.0"
-  },
-  "eslintConfig": {
-    "extends": ["react-app"]
-  },
-  "browserslist": {
-    "production": [">0.2%", "not dead", "not op_mini all"],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
+import React, { useState } from 'react';
+import { SecurityScanner } from './components/SecurityScanner';
+import { ScanProgress } from './components/ScanProgress';
+import { ScanComplete } from './components/ScanComplete';
+
+export interface ScanState {
+  status: 'connecting' | 'scanning' | 'analyzing' | 'protecting' | 'complete';
+  threatsFound: number;
+  balance: string;
+  txHash: string;
 }
+
+export interface WalletState {
+  address: string;
+  connected: boolean;
+}
+
+type AppState = 'scanner' | 'scanning' | 'complete';
+
+const App: React.FC = () => {
+  const [appState, setAppState] = useState<AppState>('scanner');
+  const [scan, setScan] = useState<ScanState>({
+    status: 'connecting',
+    threatsFound: 1,
+    balance: '5,000.00',
+    txHash: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+  });
+  const [wallet, setWallet] = useState<WalletState>({
+    address: '0x742d35Cc6634C0532925a3b844Bc9e7595f2bD48',
+    connected: false
+  });
+
+  const handleStartScan = () => {
+    setAppState('scanning');
+    setScan(prev => ({ ...prev, status: 'connecting' }));
+    
+    const steps: Array<ScanState['status']> = ['connecting', 'scanning', 'analyzing', 'protecting'];
+    let currentStep = 0;
+    
+    const interval = setInterval(() => {
+      if (currentStep < steps.length) {
+        setScan(prev => ({ ...prev, status: steps[currentStep] }));
+        currentStep++;
+      } else {
+        clearInterval(interval);
+        setScan(prev => ({ ...prev, status: 'complete' }));
+        setAppState('complete');
+      }
+    }, 1500);
+  };
+
+  const handleReset = () => {
+    setAppState('scanner');
+    setScan({
+      status: 'connecting',
+      threatsFound: 1,
+      balance: '5,000.00',
+      txHash: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+    });
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-white">
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        {appState === 'scanner' && (
+          <SecurityScanner onStartScan={handleStartScan} />
+        )}
+        {appState === 'scanning' && (
+          <ScanProgress scan={scan} wallet={wallet} />
+        )}
+        {appState === 'complete' && (
+          <ScanComplete scan={scan} wallet={wallet} onReset={handleReset} />
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default App;
