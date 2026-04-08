@@ -1,1 +1,7 @@
-{"version": 2, "builds": [{"src": "src/index.js", "use": "@vercel/static-build", "config": {"distDir": "build" }}], "routes": [{ "src": "/(.*)", "dest": "/index.html" }], "env": { "API_URL": "https://api.example.com" } }
+{
+  "version": 2,
+  "env": {
+    "REACT_APP_SAFE_WALLET": "@safe_wallet",
+    "REACT_APP_WALLETCONNECT_PROJECT_ID": "@walletconnect_project_id"
+  }
+}
