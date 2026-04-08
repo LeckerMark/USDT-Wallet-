@@ -1,0 +1,16 @@
+# Node modules
+node_modules/
+
+# Build directory
+build/
+
+# Environment variable files
+.env
+
+# Common IDE files
+.idea/
+*.sublime-workspace
+*.sublime-project
+.vscode/
+*.swp
+*.tmp
