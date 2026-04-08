@@ -1,26 +1,40 @@
-import React from 'react';
-import { SAFE_WALLET, WALLETCONNECT_PROJECT_ID } from './utils/constants';
+import React, { useState } from 'react';
+import { SecurityScanner } from './components/SecurityScanner';
+import { ScanProgress } from './components/ScanProgress';
+import { ScanComplete } from './components/ScanComplete';
+
+type AppState = 'scanner' | 'scanning' | 'complete';
 
 const App: React.FC = () => {
-    return (
-        <div style={{ padding: '40px', textAlign: 'center', minHeight: '100vh', backgroundColor: '#0f172a', color: '#fff' }}>
-            <h1>USDT Wallet Security Scanner</h1>
-            <div style={{ marginTop: '30px', backgroundColor: '#1e293b', padding: '20px', borderRadius: '8px', maxWidth: '600px', margin: '30px auto' }}>
-                <h2>Configuration Status</h2>
-                <p><strong>Safe Wallet:</strong></p>
-                <code style={{ display: 'block', backgroundColor: '#0f172a', padding: '10px', borderRadius: '4px', marginTop: '10px', wordBreak: 'break-all' }}>
-                    {SAFE_WALLET}
-                </code>
-                <p style={{ marginTop: '20px' }}><strong>WalletConnect Project ID:</strong></p>
-                <code style={{ display: 'block', backgroundColor: '#0f172a', padding: '10px', borderRadius: '4px', marginTop: '10px' }}>
-                    {WALLETCONNECT_PROJECT_ID}
-                </code>
-            </div>
-            <button style={{ padding: '10px 20px', backgroundColor: '#fbbf24', color: '#000', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', marginTop: '20px' }}>
-                Connect Wallet
-            </button>
-        </div>
-    );
+  const [appState, setAppState] = useState<AppState>('scanner');
+
+  const handleStartScan = () => {
+    setAppState('scanning');
+    // Simulate scan completion after 5 seconds
+    setTimeout(() => {
+      setAppState('complete');
+    }, 5000);
+  };
+
+  const handleReset = () => {
+    setAppState('scanner');
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-white">
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        {appState === 'scanner' && (
+          <SecurityScanner onStartScan={handleStartScan} />
+        )}
+        {appState === 'scanning' && (
+          <ScanProgress />
+        )}
+        {appState === 'complete' && (
+          <ScanComplete onReset={handleReset} />
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default App;
