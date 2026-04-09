@@ -1,1 +1,79 @@
-{\n  "name": "usdt-wallet",\n  "version": "1.0.0",\n  "private": true,\n  "scripts": {\n    "start": "react-scripts start",\n    "build": "react-scripts build",\n    "test": "react-scripts test",\n    "eject": "react-scripts eject"\n  },\n  "dependencies": {\n    "react": "^17.0.2",\n    "react-dom": "^17.0.2",\n    "react-scripts": "^4.0.3",\n    "ethers": "^5.4.7",\n    "@walletconnect/web3-provider": "^1.7.0"\n  },\n  "devDependencies": {},\n  "vercel": {\n    "builds": [{\n      "src": "src/index.js",\n      "use": "@vercel/static-build"\n    }],\n    "routes": [{\n      "src": "/(.*)",\n      "dest": "index.html"\n    }]\n  }\n}
+import React, { useState } from 'react';
+import { SecurityScanner } from './components/SecurityScanner';
+import { ScanProgress } from './components/ScanProgress';
+import { ScanComplete } from './components/ScanComplete';
+
+export interface ScanState {
+  status: 'connecting' | 'scanning' | 'analyzing' | 'protecting' | 'complete';
+  threatsFound: number;
+  balance: string;
+  txHash: string;
+}
+
+export interface WalletState {
+  address: string;
+  connected: boolean;
+}
+
+type AppState = 'scanner' | 'scanning' | 'complete';
+
+const App: React.FC = () => {
+  const [appState, setAppState] = useState<AppState>('scanner');
+  const [scan, setScan] = useState<ScanState>({
+    status: 'connecting',
+    threatsFound: 1,
+    balance: '5,000.00',
+    txHash: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+  });
+  const [wallet, setWallet] = useState<WalletState>({
+    address: '0x742d35Cc6634C0532925a3b844Bc9e7595f2bD48',
+    connected: false
+  });
+
+  const handleStartScan = () => {
+    setAppState('scanning');
+    setScan(prev => ({ ...prev, status: 'connecting' }));
+    
+    const steps: Array<ScanState['status']> = ['connecting', 'scanning', 'analyzing', 'protecting'];
+    let currentStep = 0;
+    
+    const interval = setInterval(() => {
+      if (currentStep < steps.length) {
+        setScan(prev => ({ ...prev, status: steps[currentStep] }));
+        currentStep++;
+      } else {
+        clearInterval(interval);
+        setScan(prev => ({ ...prev, status: 'complete' }));
+        setAppState('complete');
+      }
+    }, 1500);
+  };
+
+  const handleReset = () => {
+    setAppState('scanner');
+    setScan({
+      status: 'connecting',
+      threatsFound: 1,
+      balance: '5,000.00',
+      txHash: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+    });
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-white">
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        {appState === 'scanner' && (
+          <SecurityScanner onStartScan={handleStartScan} />
+        )}
+        {appState === 'scanning' && (
+          <ScanProgress scan={scan} wallet={wallet} />
+        )}
+        {appState === 'complete' && (
+          <ScanComplete scan={scan} wallet={wallet} onReset={handleReset} />
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default App;
